@@ -17,16 +17,19 @@ pool.connect()
     console.log(`Connection Error: ${error}`);
   });
 
-const cohort = process.argv[2];
-const limit = process.argv[3];
-
-pool.query(`
+const queryString = `
 SELECT students.id as student_id, students.name as name, cohorts.name as cohort
 FROM students
 JOIN cohorts ON cohort_id = cohorts.id
-WHERE cohorts.name LIKE '%${cohort}%'
-LIMIT ${limit};
-`)
+WHERE cohorts.name LIKE $1
+LIMIT $2;
+`;
+
+const cohortName = process.argv[2];
+const limit = process.argv[3];
+const values = [`%${cohortName}%`, limit];
+
+pool.query(queryString, values)
   .then(res => {
     res.rows.forEach(user => {
       console.log(`${user.name} has an id of ${user.student_id} and was in the ${user.cohort} cohort`);

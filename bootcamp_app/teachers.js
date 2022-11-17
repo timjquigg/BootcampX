@@ -17,17 +17,19 @@ pool.connect()
     console.log(`Connection Error: ${error}`);
   });
 
-const cohort = process.argv[2];
-
-pool.query(`
+const queryString = `
 SELECT DISTINCT teachers.name as teacher, cohorts.name as cohort
 FROM assistance_requests
 JOIN teachers on teacher_id = teachers.id
 JOIN students on student_id = students.id
 JOIN cohorts on students.cohort_id = cohorts.id
-WHERE cohorts.name LIKE '%${cohort}%'
+WHERE cohorts.name LIKE $1
 ORDER BY teacher;
-`)
+`;
+
+const cohortName = process.argv[2];
+
+pool.query(queryString, [`%${cohortName}%`])
   .then(res => {
     res.rows.forEach(teacher => {
       console.log(`${teacher.cohort}: ${teacher.teacher}`);
